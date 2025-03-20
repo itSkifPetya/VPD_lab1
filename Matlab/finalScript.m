@@ -11,10 +11,10 @@ time = cell(1, n); % Время
 angle = cell(1, n); % Угол
 speed = cell(1, n); % Скорость
 
-% Напряжения (исключаем U = 0)
+% Напряжения в процентах (исключаем U = 0)
 vols = [100, 80, 60, 40, 20, -20, -40, -60, -80, -100];
 
-% W_ust, k_guess
+% W_ust, T_m
 arr0 = [-14.1, 0.1000];
 arr1 = [-10.1, 0.0906];
 arr2 = [-8.2, 0.0922];
@@ -26,6 +26,15 @@ arr8 = [8.5, 0.0937];
 arr9 = [11.5, 0.1003];
 arr10 = [14.8, 0.1043];
 par_fit_old = [arr0; arr1; arr2; arr3; arr4; arr6; arr7; arr8; arr9; arr10];
+
+% Инициализация массива par_fit
+par_fit = zeros(n, 2);
+
+% Вычисление новых значений k и T_m
+for i = 1:n
+    k_guess = par_fit_old(i, 1) * vols(i);
+    par_fit(i, :) = [k_guess / 1000, par_fit_old(i, 2)];
+end
 
 % Чтение данных из файлов
 for i = 1:length(vols)
@@ -40,16 +49,6 @@ end
 for i = 1:n
     angle{i} = angle{i} - angle{i}(1);
 end
-
-% Инициализация массива par_fit
-par_fit = zeros(n, 2);
-
-% Вычисление новых значений k и T_m
-for i = 1:n
-    k_guess = par_fit_old(i, 1) * vols(i);
-    par_fit(i, :) = [k_guess / 1000, par_fit_old(i, 2)];
-end
-
 
 % Задание номеров измерений
 par1 = 1:2;
@@ -71,8 +70,8 @@ for i = par1
     t_m = par(2);
     time_apr = 0:0.01:1;
     alpha = U_pr * k * (1 - exp(-time_apr / t_m));
-    plot(time_apr, alpha, 'DisplayName', sprintf('(Apr) U = %d V', vols(i)));
-    plot(time{i}, speed{i}, 'DisplayName', sprintf('U = %d V', vols(i)));
+    plot(time_apr, alpha, 'DisplayName', sprintf('(A) U = %d %%', vols(i)));
+    plot(time{i}, speed{i}, 'DisplayName', sprintf('U = %d %%', vols(i)));
     
     % Добавляем данные из Simulink
     simOut = sim("untitled.slx", 'ReturnWorkspaceOutputs', 'on');
@@ -81,12 +80,12 @@ for i = par1
     
     % Интерполяция данных Simulink на time{i}
     data_omega_interp = interp1(time_omega, data_omega, time{i}, 'linear', 'extrap');
-    plot(time{i}, data_omega_interp, '--', 'DisplayName', sprintf('(Sim) U = %d V', vols(i)));
+    plot(time{i}, data_omega_interp, '--', 'DisplayName', sprintf('(S) U = %d %%', vols(i)));
 end
-title('Зависимость угловой скорости от времени');
+% title('Зависимость угловой скорости от времени');
 xlabel('Время (с)');
 ylabel('Угловая скорость (рад/с)');
-legend('show', 'Location', 'best');
+% legend('show', 'Location', 'best');
 grid on;
 hold off;
 
@@ -101,8 +100,8 @@ for i = par2
     t_m = par(2);
     time_apr = 0:0.01:1;
     alpha = U_pr * k * (1 - exp(-time_apr / t_m));
-    plot(time_apr, alpha, 'DisplayName', sprintf('(Apr) U = %d V', vols(i)));
-    plot(time{i}, speed{i}, 'DisplayName', sprintf('U = %d V', vols(i)));
+    plot(time_apr, alpha, 'DisplayName', sprintf('(A) U = %d %%', vols(i)));
+    plot(time{i}, speed{i}, 'DisplayName', sprintf('U = %d %%', vols(i)));
     
     % Добавляем данные из Simulink
     simOut = sim("untitled.slx", 'ReturnWorkspaceOutputs', 'on');
@@ -111,12 +110,12 @@ for i = par2
     
     % Интерполяция данных Simulink на time{i}
     data_omega_interp = interp1(time_omega, data_omega, time{i}, 'linear', 'extrap');
-    plot(time{i}, data_omega_interp, '--', 'DisplayName', sprintf('(Sim) U = %d V', vols(i)));
+    plot(time{i}, data_omega_interp, '--', 'DisplayName', sprintf('(S) U = %d %%', vols(i)));
 end
-title('Зависимость угловой скорости от времени');
+% title('Зависимость угловой скорости от времени');
 xlabel('Время (с)');
 ylabel('Угловая скорость (рад/с)');
-legend('show', 'Location', 'best');
+% legend('show', 'Location', 'best');
 grid on;
 hold off;
 
@@ -131,8 +130,8 @@ for i = par3
     t_m = par(2);
     time_apr = 0:0.01:1;
     alpha = U_pr * k * (1 - exp(-time_apr / t_m));
-    plot(time_apr, alpha, 'DisplayName', sprintf('(Apr) U = %d V', vols(i)));
-    plot(time{i}, speed{i}, 'DisplayName', sprintf('U = %d V', vols(i)));
+    plot(time_apr, alpha, 'DisplayName', sprintf('(A) U = %d %%', vols(i)));
+    plot(time{i}, speed{i}, 'DisplayName', sprintf('U = %d %%', vols(i)));
     
     % Добавляем данные из Simulink
     simOut = sim("untitled.slx", 'ReturnWorkspaceOutputs', 'on');
@@ -141,12 +140,12 @@ for i = par3
     
     % Интерполяция данных Simulink на time{i}
     data_omega_interp = interp1(time_omega, data_omega, time{i}, 'linear', 'extrap');
-    plot(time{i}, data_omega_interp, '--', 'DisplayName', sprintf('(Sim) U = %d V', vols(i)));
+    plot(time{i}, data_omega_interp, '--', 'DisplayName', sprintf('(S) U = %d %%', vols(i)));
 end
-title('Зависимость угловой скорости от времени');
+% title('Зависимость угловой скорости от времени');
 xlabel('Время (с)');
 ylabel('Угловая скорость (рад/с)');
-legend('show', 'Location', 'best');
+% legend('show', 'Location', 'best');
 grid on;
 hold off;
 
@@ -161,8 +160,8 @@ for i = par4
     t_m = par(2);
     time_apr = 0:0.01:1;
     alpha = U_pr * k * (1 - exp(-time_apr / t_m));
-    plot(time_apr, alpha, 'DisplayName', sprintf('(Apr) U = %d V', vols(i)));
-    plot(time{i}, speed{i}, 'DisplayName', sprintf('U = %d V', vols(i)));
+    plot(time_apr, alpha, 'DisplayName', sprintf('(A) U = %d %%', vols(i)));
+    plot(time{i}, speed{i}, 'DisplayName', sprintf('U = %d %%', vols(i)));
     
     % Добавляем данные из Simulink
     simOut = sim("untitled.slx", 'ReturnWorkspaceOutputs', 'on');
@@ -171,12 +170,12 @@ for i = par4
     
     % Интерполяция данных Simulink на time{i}
     data_omega_interp = interp1(time_omega, data_omega, time{i}, 'linear', 'extrap');
-    plot(time{i}, data_omega_interp, '--', 'DisplayName', sprintf('(Sim) U = %d V', vols(i)));
+    plot(time{i}, data_omega_interp, '--', 'DisplayName', sprintf('(S) U = %d %%', vols(i)));
 end
-title('Зависимость угловой скорости от времени');
+% title('Зависимость угловой скорости от времени');
 xlabel('Время (с)');
 ylabel('Угловая скорость (рад/с)');
-legend('show', 'Location', 'best');
+% legend('show', 'Location', 'best');
 grid on;
 hold off;
 
@@ -191,8 +190,8 @@ for i = par5
     t_m = par(2);
     time_apr = 0:0.01:1;
     alpha = U_pr * k * (1 - exp(-time_apr / t_m));
-    plot(time_apr, alpha, 'DisplayName', sprintf('(Apr) U = %d V', vols(i)));
-    plot(time{i}, speed{i}, 'DisplayName', sprintf('U = %d V', vols(i)));
+    plot(time_apr, alpha, 'DisplayName', sprintf('(A) U = %d %%', vols(i)));
+    plot(time{i}, speed{i}, 'DisplayName', sprintf('U = %d %%', vols(i)));
     
     % Добавляем данные из Simulink
     simOut = sim("untitled.slx", 'ReturnWorkspaceOutputs', 'on');
@@ -201,12 +200,12 @@ for i = par5
     
     % Интерполяция данных Simulink на time{i}
     data_omega_interp = interp1(time_omega, data_omega, time{i}, 'linear', 'extrap');
-    plot(time{i}, data_omega_interp, '--', 'DisplayName', sprintf('(Sim) U = %d V', vols(i)));
+    plot(time{i}, data_omega_interp, '--', 'DisplayName', sprintf('(S) U = %d %%', vols(i)));
 end
-title('Зависимость угловой скорости от времени');
+% title('Зависимость угловой скорости от времени');
 xlabel('Время (с)');
 ylabel('Угловая скорость (рад/с)');
-legend('show', 'Location', 'best');
+% legend('show', 'Location', 'best');
 grid on;
 hold off;
 
@@ -214,7 +213,7 @@ hold off;
 figure(6);
 hold on;
 for i = par1    
-    plot(time{i}, angle{i}, 'DisplayName', sprintf('U = %d V', vols(i)));
+    plot(time{i}, angle{i}, 'DisplayName', sprintf('U = %d %%', vols(i)));
     U_pr = vols(i);
     % Функция для аппроксимации
     fun = @(par, time) U_pr * par(1) * (time - par(2) * (1 - exp(-time / par(2))));
@@ -224,7 +223,7 @@ for i = par1
     t_m = par(2);
     time_apr = 0:0.01:1;
     theta = U_pr * k * (time_apr - t_m * (1 - exp(-time_apr / t_m)));
-    plot(time_apr, theta, 'DisplayName', sprintf('(Appr) U = %d V', vols(i)));
+    plot(time_apr, theta, 'DisplayName', sprintf('(A) U = %d %%', vols(i)));
     
     % Добавляем данные из Simulink
     simOut = sim("untitled.slx", 'ReturnWorkspaceOutputs', 'on');
@@ -233,21 +232,20 @@ for i = par1
     
     % Интерполяция данных Simulink на time{i}
     data_theta_interp = interp1(time_theta, data_theta, time{i}, 'linear', 'extrap');
-    plot(time{i}, data_theta_interp, '--', 'DisplayName', sprintf('(Sim) U = %d V', vols(i)));
+    plot(time{i}, data_theta_interp, '--', 'DisplayName', sprintf('(S) U = %d %%', vols(i)));
 end
-title('Зависимость угла от времени');
+% title('Зависимость угла от времени');
 xlabel('Время (с)');
 ylabel('Угол (рад)');
-legend('show', 'Location', 'best');
+% legend('show', 'Location', 'best');
 grid on;
 hold off;
 
-% Повторяем аналогично для остальных графиков...
 % График зависимости угла от времени для измерений 3,4
 figure(7);
 hold on;
 for i = par2    
-    plot(time{i}, angle{i}, 'DisplayName', sprintf('U = %d V', vols(i)));
+    plot(time{i}, angle{i}, 'DisplayName', sprintf('U = %d %%', vols(i)));
     U_pr = vols(i);
     % Функция для аппроксимации
     fun = @(par, time) U_pr * par(1) * (time - par(2) * (1 - exp(-time / par(2))));
@@ -257,7 +255,7 @@ for i = par2
     t_m = par(2);
     time_apr = 0:0.01:1;
     theta = U_pr * k * (time_apr - t_m * (1 - exp(-time_apr / t_m)));
-    plot(time_apr, theta, 'DisplayName', sprintf('(Appr) U = %d V', vols(i)));
+    plot(time_apr, theta, 'DisplayName', sprintf('(A) U = %d %%', vols(i)));
     
     % Добавляем данные из Simulink
     simOut = sim("untitled.slx", 'ReturnWorkspaceOutputs', 'on');
@@ -266,12 +264,12 @@ for i = par2
     
     % Интерполяция данных Simulink на time{i}
     data_theta_interp = interp1(time_theta, data_theta, time{i}, 'linear', 'extrap');
-    plot(time{i}, data_theta_interp, '--', 'DisplayName', sprintf('(Sim) U = %d V', vols(i)));
+    plot(time{i}, data_theta_interp, '--', 'DisplayName', sprintf('(S) U = %d %%', vols(i)));
 end
-title('Зависимость угла от времени');
+% title('Зависимость угла от времени');
 xlabel('Время (с)');
 ylabel('Угол (рад)');
-legend('show', 'Location', 'best');
+% legend('show', 'Location', 'best');
 grid on;
 hold off;
 
@@ -279,7 +277,7 @@ hold off;
 figure(8);
 hold on;
 for i = par3    
-    plot(time{i}, angle{i}, 'DisplayName', sprintf('U = %d V', vols(i)));
+    plot(time{i}, angle{i}, 'DisplayName', sprintf('U = %d %%', vols(i)));
     U_pr = vols(i);
     % Функция для аппроксимации
     fun = @(par, time) U_pr * par(1) * (time - par(2) * (1 - exp(-time / par(2))));
@@ -289,7 +287,7 @@ for i = par3
     t_m = par(2);
     time_apr = 0:0.01:1;
     theta = U_pr * k * (time_apr - t_m * (1 - exp(-time_apr / t_m)));
-    plot(time_apr, theta, 'DisplayName', sprintf('(Appr) U = %d V', vols(i)));
+    plot(time_apr, theta, 'DisplayName', sprintf('(A) U = %d %%', vols(i)));
     
     % Добавляем данные из Simulink
     simOut = sim("untitled.slx", 'ReturnWorkspaceOutputs', 'on');
@@ -298,12 +296,12 @@ for i = par3
     
     % Интерполяция данных Simulink на time{i}
     data_theta_interp = interp1(time_theta, data_theta, time{i}, 'linear', 'extrap');
-    plot(time{i}, data_theta_interp, '--', 'DisplayName', sprintf('(Sim) U = %d V', vols(i)));
+    plot(time{i}, data_theta_interp, '--', 'DisplayName', sprintf('(S) U = %d %%', vols(i)));
 end
-title('Зависимость угла от времени');
+% title('Зависимость угла от времени');
 xlabel('Время (с)');
 ylabel('Угол (рад)');
-legend('show', 'Location', 'best');
+% legend('show', 'Location', 'best');
 grid on;
 hold off;
 
@@ -311,7 +309,7 @@ hold off;
 figure(9);
 hold on;
 for i = par4    
-    plot(time{i}, angle{i}, 'DisplayName', sprintf('U = %d V', vols(i)));
+    plot(time{i}, angle{i}, 'DisplayName', sprintf('U = %d %%', vols(i)));
     U_pr = vols(i);
     % Функция для аппроксимации
     fun = @(par, time) U_pr * par(1) * (time - par(2) * (1 - exp(-time / par(2))));
@@ -321,7 +319,7 @@ for i = par4
     t_m = par(2);
     time_apr = 0:0.01:1;
     theta = U_pr * k * (time_apr - t_m * (1 - exp(-time_apr / t_m)));
-    plot(time_apr, theta, 'DisplayName', sprintf('(Appr) U = %d V', vols(i)));
+    plot(time_apr, theta, 'DisplayName', sprintf('(A) U = %d %%', vols(i)));
     
     % Добавляем данные из Simulink
     simOut = sim("untitled.slx", 'ReturnWorkspaceOutputs', 'on');
@@ -330,12 +328,12 @@ for i = par4
     
     % Интерполяция данных Simulink на time{i}
     data_theta_interp = interp1(time_theta, data_theta, time{i}, 'linear', 'extrap');
-    plot(time{i}, data_theta_interp, '--', 'DisplayName', sprintf('(Sim) U = %d V', vols(i)));
+    plot(time{i}, data_theta_interp, '--', 'DisplayName', sprintf('(S) U = %d %%', vols(i)));
 end
-title('Зависимость угла от времени');
+% title('Зависимость угла от времени');
 xlabel('Время (с)');
 ylabel('Угол (рад)');
-legend('show', 'Location', 'best');
+% legend('show', 'Location', 'best');
 grid on;
 hold off;
 
@@ -343,7 +341,7 @@ hold off;
 figure(10);
 hold on;
 for i = par5    
-    plot(time{i}, angle{i}, 'DisplayName', sprintf('U = %d V', vols(i)));
+    plot(time{i}, angle{i}, 'DisplayName', sprintf('U = %d %%', vols(i)));
     U_pr = vols(i);
     % Функция для аппроксимации
     fun = @(par, time) U_pr * par(1) * (time - par(2) * (1 - exp(-time / par(2))));
@@ -353,7 +351,7 @@ for i = par5
     t_m = par(2);
     time_apr = 0:0.01:1;
     theta = U_pr * k * (time_apr - t_m * (1 - exp(-time_apr / t_m)));
-    plot(time_apr, theta, 'DisplayName', sprintf('(Appr) U = %d V', vols(i)));
+    plot(time_apr, theta, 'DisplayName', sprintf('(A) U = %d %%', vols(i)));
     
     % Добавляем данные из Simulink
     simOut = sim("untitled.slx", 'ReturnWorkspaceOutputs', 'on');
@@ -362,14 +360,25 @@ for i = par5
     
     % Интерполяция данных Simulink на time{i}
     data_theta_interp = interp1(time_theta, data_theta, time{i}, 'linear', 'extrap');
-    plot(time{i}, data_theta_interp, '--', 'DisplayName', sprintf('(Sim) U = %d V', vols(i)));
+    plot(time{i}, data_theta_interp, '--', 'DisplayName', sprintf('(S) U = %d %%', vols(i)));
 end
-title('Зависимость угла от времени');
+% title('Зависимость угла от времени');
 xlabel('Время (с)');
 ylabel('Угол (рад)');
-legend('show', 'Location', 'best');
+% legend('show', 'Location', 'best');
 grid on;
 hold off;
+
+figHandles = findobj('Type', 'figure'); % Получаем все графические окна
+for i = 1:length(figHandles)
+        figure(figHandles(i)); % Делаем текущей i-ю фигуру
+        
+        % Находим все объекты линий на графике
+        lineHandles = findobj(gca, 'Type', 'line');
+        
+        % Устанавливаем толщину линий
+        set(lineHandles, 'LineWidth', 2);
+end
 
 % График 3: Зависимость угловой скорости от напряжения
 figure;
@@ -397,8 +406,8 @@ plot(U_fit, w_fit, '-', 'LineWidth', 2, 'DisplayName', 'Аппроксимаци
 plot(voltage_values, mean_speeds, 'o', 'DisplayName', 'Экспериментальные данные'); % Экспериментальные точки
 
 % Настройка графика
-title('Зависимость угловой скорости от напряжения');
-xlabel('Напряжение (В)');
+% title('Зависимость угловой скорости от напряжения');
+xlabel('Напряжение (%)');
 ylabel('Угловая скорость (рад/с)');
 legend('show', 'Location','best');
 grid on;
@@ -406,7 +415,6 @@ grid on;
 % График 4: Зависимость T_m от напряжения
 figure;
 Tm_values = par_fit(:, 2); % Извлекаем второй столбец (T_m)
-
 
 % Построение графика
 plot(vols, Tm_values, 'o-', 'LineWidth', 2); % Линия с маркерами
@@ -418,16 +426,35 @@ plot([min(vols), max(vols)], [Tm_mean, Tm_mean], '--r', 'LineWidth', 1.5, ...
      'DisplayName', sprintf('Среднее значение T_m = %.4f', Tm_mean));
 
 % Настройка графика
-title('Зависимость T_m от напряжения');
+% title('Зависимость T_m от напряжения');
 xlabel('Напряжение (в процентах)');
-ylabel('Электромеханическая постоянная времени T_m (с)');
-legend('T_m(U)', 'Среднее значение T_m', 'Location', 'best');
+ylabel('T_m (с)');
+legend({'$T_m(U)$', '$\overline{T_m}$'}, 'Interpreter', 'latex');
 grid on;
 hold off;
+
+% Проходим по всем фигурам и задаем одинаковые размеры
+figHandles = findobj('Type', 'figure'); % Получаем все графические окна
+for i = 1:length(figHandles)
+    f = figure(figHandles(i)); % Делаем текущей i-ю фигуру
+    ax = gca;
+    set(ax,'FontSize', 20, 'FontName', 'Times New Roman', 'FontWeight', 'normal')
+    set(gcf, 'Position', [100, 100, 620, 500]); % Устанавливаем размеры
+    leg = legend('show', 'Location', 'best');
+    set(leg, 'FontSize', 10)
+    titleObj = ax.Title;
+    if ~isempty(titleObj)
+        titleObj.FontSize = 20;       % Размер шрифта
+        titleObj.FontWeight = 'normal'; % Обычная жирность
+    end
+end
 
 % Сохранение всех графиков
 figHandles = findobj('Type', 'figure');
 for i = length(figHandles):-1:1
     figure(figHandles(i)); % Делаем текущей i-ю фигуру
-    saveas(gcf, sprintf('graphsFinal/graph%d.jpg', i)); % Сохраняем как JPG
+    % Экспорт в PDF с сохранением размеров и шрифтов
+    exportgraphics(gcf, sprintf('graphsFinal/graphE+A%d.pdf', i), ...
+        'ContentType', 'vector', ... % Используем векторный формат
+        'Resolution', 300);          % Разрешение для растровых элементов
 end
